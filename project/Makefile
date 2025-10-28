@@ -72,14 +72,20 @@ clean-data:
 	@printf "Cleaning persistent data directories...\n"
 	@printf "This will remove all database and WordPress data\n"
 	@printf "=================================================\n"
-	@docker-compose -f srcs/docker-compose.yml down
-	@docker volume rm srcs_mariadb_data srcs_wordpress_data 2>/dev/null || true
+	@docker-compose -f srcs/docker-compose.yml down -v 2>/dev/null || true
+	@printf "Removing bind mount directories...\n"
+	@sudo sh -c 'rm -rf /home/${USER}/data/mariadb/* /home/${USER}/data/mariadb/.[!.]* 2>/dev/null' || true
+	@sudo sh -c 'rm -rf /home/${USER}/data/wordpress/* /home/${USER}/data/wordpress/.[!.]* 2>/dev/null' || true
 	@printf "=================================================\n"
-	@printf "To complete data cleanup, run:\n"
-	@printf "sudo rm -rf /home/${USER}/data/mariadb/*\n"
-	@printf "sudo rm -rf /home/${USER}/data/wordpress/*\n"
+	@printf "All persistent data cleaned successfully!\n"
+	@printf "=================================================\n"
+
+clean-all: fclean clean-data
+	@printf "=================================================\n"
+	@printf "Complete cleanup finished!\n"
+	@printf "All Docker resources and data removed.\n"
 	@printf "=================================================\n"
 
 re:	clean all
 
-.PHONY	: all build down re clean fclean clean-data ssl
+.PHONY	: all build down re clean fclean clean-data clean-all ssl
